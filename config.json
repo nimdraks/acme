@@ -1,0 +1,7 @@
+{
+  "dsn": "[insert your db config here]",
+  "address": "127.0.0.1:3306",
+  "basePrice":  100.00,
+  "exchangeRateBaseURL": "http://apilayer.net",
+  "exchangeRateAPIKey": "KqLgYfBfNgCgGfHG6UFdJWp3qOdaoGYc"
+}
