@@ -34,7 +34,7 @@ type Config struct {
 
 // Load returns the config loaded from environment
 func init() {
-	filename, found := os.LookupEnv("C:\\config.json")
+	filename, found := os.LookupEnv(DefaultEnvVar)
 	if !found {
 		logging.L.Error("failed to locate file specified by %s", DefaultEnvVar)
 		return
