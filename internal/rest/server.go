@@ -41,15 +41,13 @@ func (s *Server) Listen(stop <-chan struct{}) {
 	// listen for shutdown
 	go func() {
 		// wait for shutdown signal
+		<-stop
 
+		_ = s.server.Close()
 	}()
 
 	// start the HTTP server
 	_ = s.server.ListenAndServe()
-
-	<-stop
-
-	_ = s.server.Close()
 }
 
 // configure the endpoints to handlers
