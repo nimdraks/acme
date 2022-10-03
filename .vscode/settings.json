@@ -1,0 +1,5 @@
+{
+    "go.testEnvVars": {
+        "ACME_CONFIG" : "C:\\Users\\가족\\Documents\\vscode\\acme\\acme\\config.json"
+    },
+}
