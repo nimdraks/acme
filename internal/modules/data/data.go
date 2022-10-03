@@ -2,10 +2,13 @@ package data
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"io"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
+
 	// import the MySQL Driver
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -51,6 +54,26 @@ type Person struct {
 	Currency string
 	// Price is the amount (in the above currency) paid by this person
 	Price float64
+}
+
+func (p *Person) WriteJson(writer io.Writer) error {
+	// the JSON response format
+	type getResponseFormat struct {
+		ID       int     `json:"id"`
+		FullName string  `json:"name"`
+		Phone    string  `json:"phone"`
+		Currency string  `json:"currency"`
+		Price    float64 `json:"price"`
+	}
+
+	output := &getResponseFormat{
+		ID:       p.ID,
+		FullName: p.FullName,
+		Phone:    p.Phone,
+		Currency: p.Currency,
+		Price:    p.Price,
+	}
+	return json.NewEncoder(writer).Encode(output)
 }
 
 // Save will save the supplied person and return the ID of the newly created person or an error.

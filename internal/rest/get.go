@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -9,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/get"
 	"github.com/gorilla/mux"
 )
@@ -77,25 +75,11 @@ func (h *GetHandler) extractID(request *http.Request) (int, error) {
 	return id, nil
 }
 
-// output the supplied person as JSON
-func (h *GetHandler) writeJSON(writer io.Writer, person *data.Person) error {
-	output := &getResponseFormat{
-		ID:       person.ID,
-		FullName: person.FullName,
-		Phone:    person.Phone,
-		Currency: person.Currency,
-		Price:    person.Price,
-	}
-
-	// call to http.ResponseWriter.Write() will cause HTTP OK (200) to be output as well
-	return json.NewEncoder(writer).Encode(output)
+type writeReponseJson interface {
+	WriteJson(writer io.Writer) error
 }
 
-// the JSON response format
-type getResponseFormat struct {
-	ID       int     `json:"id"`
-	FullName string  `json:"name"`
-	Phone    string  `json:"phone"`
-	Currency string  `json:"currency"`
-	Price    float64 `json:"price"`
+// output the supplied person as JSON
+func (h *GetHandler) writeJSON(writer io.Writer, data writeReponseJson) error {
+	return data.WriteJson(writer)
 }
