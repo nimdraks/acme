@@ -2,6 +2,6 @@
   "dsn": "root:1234@tcp(127.0.0.1:3306)/acme",
   "address": "127.0.0.1:8080",
   "basePrice":  100.00,
-  "exchangeRateBaseURL": "http://apilayer.net",
+  "exchangeRateBaseURL": "https://api.apilayer.com/currency_data",
   "exchangeRateAPIKey": "KqLgYfBfNgCgGfHG6UFdJWp3qOdaoGYc"
 }

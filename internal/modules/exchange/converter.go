@@ -11,9 +11,10 @@ import (
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 )
 
+// https://apilayer.com/marketplace/currency_data-api#
 const (
 	// request URL for the exchange rate API
-	urlFormat = "%s/api/historical?access_key=%s&date=2018-06-20&currencies=%s"
+	urlFormat = "%s/historical?date=2018-06-20"
 
 	// default price that is sent when an error occurs
 	defaultPrice = 0.0
@@ -45,12 +46,13 @@ func (c *Converter) Do(basePrice float64, currency string) (float64, error) {
 func (c *Converter) loadRateFromServer(currency string) (*http.Response, error) {
 	// build the request
 	url := fmt.Sprintf(urlFormat,
-		config.App.ExchangeRateBaseURL,
-		config.App.ExchangeRateAPIKey,
-		currency)
+		config.App.ExchangeRateBaseURL)
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("apikey", "LYYUiDygZGXCdL5yTbHvV04GfdOOd4gn")
 
 	// perform request
-	response, err := http.Get(url)
+	client := &(http.Client{})
+	response, err := client.Do(req)
 	if err != nil {
 		logging.L.Warn("[exchange] failed to load. err: %s", err)
 		return nil, err
