@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice/sqldb"
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice/db"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 )
 
@@ -19,11 +19,11 @@ type DataServiceInterface interface {
 }
 
 type DataService struct {
-	db sqldb.DBService
+	db db.DBService
 }
 
 func InitDataService(DSN string) *DataService {
-	sqlDB := sqldb.InitDBService(DSN)
+	sqlDB := db.InitDBService(DSN)
 	return &DataService{db: sqlDB}
 }
 
