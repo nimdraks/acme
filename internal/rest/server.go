@@ -4,13 +4,16 @@ import (
 	"net/http"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/gorilla/mux"
 )
 
 // New will create and initialize the server
 func New(config *config.Config) *Server {
+	dataService := dataservice.InitDataService(config.DSN)
 	return &Server{
 		config:          config,
+		dataService:     dataService,
 		handlerGet:      &GetHandler{},
 		handlerList:     &ListHandler{},
 		handlerNotFound: notFoundHandler,
@@ -20,8 +23,9 @@ func New(config *config.Config) *Server {
 
 // Server is the HTTP REST server
 type Server struct {
-	server *http.Server
-	config *config.Config
+	server      *http.Server
+	config      *config.Config
+	dataService *dataservice.DataService
 
 	handlerGet      http.Handler
 	handlerList     http.Handler
