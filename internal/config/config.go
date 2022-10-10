@@ -59,3 +59,25 @@ func load(filename string) error {
 
 	return nil
 }
+
+func Load(filename string) *Config {
+	if filename == "" {
+		logging.L.Error("Empty filename")
+		return nil
+	}
+
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		logging.L.Error("failed to read config file. err: %s", err)
+		return nil
+	}
+
+	config := &Config{}
+	err = json.Unmarshal(bytes, config)
+	if err != nil {
+		logging.L.Error("failed to parse config file. err : %s", err)
+		return nil
+	}
+
+	return config
+}

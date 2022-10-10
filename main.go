@@ -12,6 +12,7 @@ func main() {
 	ctx := context.Background()
 
 	// start REST server
-	server := rest.New(config.App.Address)
+	config := config.Load("C:\\Users\\가족\\Documents\\vscode\\acme\\acme\\config.json")
+	server := rest.New(config)
 	server.Listen(ctx.Done())
 }

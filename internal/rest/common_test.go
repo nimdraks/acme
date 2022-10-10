@@ -3,6 +3,8 @@ package rest
 import (
 	"context"
 	"net"
+
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 )
 
 func getOpenPort() (string, error) {
@@ -25,7 +27,8 @@ func startServer(ctx context.Context) (string, error) {
 	}
 
 	// start a server
-	server := New(address)
+	config := config.Config{Address: address}
+	server := New(&config)
 	go server.Listen(ctx.Done())
 
 	// wait for server to be ready

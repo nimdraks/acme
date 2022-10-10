@@ -3,13 +3,14 @@ package rest
 import (
 	"net/http"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/gorilla/mux"
 )
 
 // New will create and initialize the server
-func New(address string) *Server {
+func New(config *config.Config) *Server {
 	return &Server{
-		address:         address,
+		config:          config,
 		handlerGet:      &GetHandler{},
 		handlerList:     &ListHandler{},
 		handlerNotFound: notFoundHandler,
@@ -19,8 +20,8 @@ func New(address string) *Server {
 
 // Server is the HTTP REST server
 type Server struct {
-	address string
-	server  *http.Server
+	server *http.Server
+	config *config.Config
 
 	handlerGet      http.Handler
 	handlerList     http.Handler
@@ -35,7 +36,7 @@ func (s *Server) Listen(stop <-chan struct{}) {
 	// create the HTTP server
 	s.server = &http.Server{
 		Handler: router,
-		Addr:    s.address,
+		Addr:    s.config.Address,
 	}
 
 	// listen for shutdown
