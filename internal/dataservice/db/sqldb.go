@@ -6,11 +6,6 @@ import (
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 )
 
-const (
-	// default person id (returned on error)
-	defaultPersonID = 0
-)
-
 type SqlDB struct {
 	sql *sql.DB
 }
