@@ -28,7 +28,7 @@ func InitDBService(DSN string) *DBService {
 	return &DBService{sql: db}
 }
 
-func (d *DBService) Load(ID string) *sql.Row {
+func (d *DBService) Load(ID int) *sql.Row {
 	// perform DB select
 	query := "SELECT id, fullname, phone, currency, price FROM person WHERE id = ? LIMIT 1"
 	row := d.sql.QueryRow(query, ID)

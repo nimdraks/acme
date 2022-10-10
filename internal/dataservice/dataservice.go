@@ -2,7 +2,9 @@ package dataservice
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"io"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice/sqldb"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
@@ -12,7 +14,7 @@ var ErrNotFound = errors.New("not found")
 
 type dbService interface {
 	Save(fullName, phone, currency, price string) (int, error)
-	Load(ID string) *sql.Row
+	Load(ID int) *sql.Row
 	LoadAll() (*sql.Rows, error)
 }
 
@@ -38,6 +40,26 @@ type Person struct {
 	Price float64
 }
 
+func (p *Person) WriteJson(writer io.Writer) error {
+	// the JSON response format
+	type getResponseFormat struct {
+		ID       int     `json:"id"`
+		FullName string  `json:"name"`
+		Phone    string  `json:"phone"`
+		Currency string  `json:"currency"`
+		Price    float64 `json:"price"`
+	}
+
+	output := &getResponseFormat{
+		ID:       p.ID,
+		FullName: p.FullName,
+		Phone:    p.Phone,
+		Currency: p.Currency,
+		Price:    p.Price,
+	}
+	return json.NewEncoder(writer).Encode(output)
+}
+
 // custom type so we can convert sql results to easily
 type scanner func(dest ...interface{}) error
 
@@ -48,7 +70,7 @@ func populatePerson(scanner scanner) (*Person, error) {
 	return out, err
 }
 
-func (d *DataService) Load(id string) (*Person, error) {
+func (d *DataService) Load(id int) (*Person, error) {
 	row := d.db.Load(id)
 
 	// retrieve columns and populate the person object
