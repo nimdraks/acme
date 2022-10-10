@@ -12,14 +12,14 @@ import (
 
 var ErrNotFound = errors.New("not found")
 
-type dbService interface {
-	Save(fullName, phone, currency, price string) (int, error)
-	Load(ID int) *sql.Row
-	LoadAll() (*sql.Rows, error)
+type DataServiceInterface interface {
+	Load(id int) (*Person, error)
+	LoadAll() ([]*Person, error)
+	Save(fullName, phone, currency, price string) int
 }
 
 type DataService struct {
-	db dbService
+	db sqldb.DBService
 }
 
 func InitDataService(DSN string) *DataService {

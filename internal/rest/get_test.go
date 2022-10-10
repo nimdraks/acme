@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +19,8 @@ func TestGetHandler_ServeHTTP(t *testing.T) {
 
 	// Create and start a server
 	// With out current implementation, we cannot test this handler without a full server as we need the mux.
-	address, err := startServer(ctx)
+	address, server, err := startServer(ctx)
+	server.DataService = dataservice.InitMockDataService("")
 	require.NoError(t, err)
 
 	// build inputs

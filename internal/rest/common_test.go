@@ -19,11 +19,11 @@ func getOpenPort() (string, error) {
 	return address, nil
 }
 
-func startServer(ctx context.Context) (string, error) {
+func startServer(ctx context.Context) (string, *Server, error) {
 	// get open port
 	address, err := getOpenPort()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	// start a server
@@ -38,17 +38,17 @@ func startServer(ctx context.Context) (string, error) {
 		if conn != nil {
 			defer conn.Close()
 
-			return address, nil
+			return address, server, nil
 		}
 
 		select {
 		case <-ctx.Done():
-			return "", ctx.Err()
+			return "", nil, ctx.Err()
 
 		default:
 			// try again
 		}
 	}
 
-	return address, nil
+	return address, server, nil
 }
