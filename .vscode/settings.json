@@ -2,4 +2,7 @@
     "go.testEnvVars": {
         "ACME_CONFIG" : "C:\\Users\\가족\\Documents\\vscode\\acme\\acme\\config.json"
     },
+    "go.formatOnSave": true,
+    // goreturns 은 goimports(자동 임포트), gofmt(자동 포맷팅)를 사용하고 리턴코드도 자동으로 채워준다.
+    "go.formatTool": "goreturns",
 }
