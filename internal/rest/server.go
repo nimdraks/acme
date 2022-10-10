@@ -24,7 +24,7 @@ func New(config *config.Config) *Server {
 type Server struct {
 	server      *http.Server
 	config      *config.Config
-	DataService dataservice.DataServiceInterface
+	DataService dataservice.DataService
 
 	handlerList     http.Handler
 	handlerNotFound http.HandlerFunc
