@@ -1,38 +1,39 @@
 package rest
 
 import (
-	"context"
-	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
-	"github.com/stretchr/testify/assert"
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetHandler_ServeHTTP(t *testing.T) {
-	// ensure the test always fails by giving it a timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
-	defer cancel()
+func TestGetHandler_Refactored(t *testing.T) {
 
-	// Create and start a server
-	// With out current implementation, we cannot test this handler without a full server as we need the mux.
-	address, server, err := startServer(ctx)
-	server.DataService = dataservice.InitMockDataService("")
-	require.NoError(t, err)
+	for _, s := range []struct {
+		desc           string
+		inRequest      *http.Request
+		d              dataservice.DataService
+		expectedStatus int
+	}{
+		{
+			desc:           "Happy path",
+			inRequest:      buildValidGetRequest(),
+			d:              dataservice.InitMockDataService(),
+			expectedStatus: http.StatusOK,
+		},
+	} {
+		response := httptest.NewRecorder()
+		handler := NewGetHandle(s.d)
+		handler.ServeHTTP(response, s.inRequest)
+		require.Equal(t, s.expectedStatus, response.Code)
+	}
+}
 
-	// build inputs
-	response, err := http.Get("http://" + address + "/person/1/")
-
-	// validate outputs
-	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, response.StatusCode)
-
-	expectedPayload := []byte(`{"id":1,"name":"John","phone":"0123456780","currency":"USD","price":100}` + "\n")
-	payload, _ := ioutil.ReadAll(response.Body)
-	defer response.Body.Close()
-
-	assert.Equal(t, expectedPayload, payload)
+func buildValidGetRequest() *http.Request {
+	r, _ := http.NewRequest("GET", "/person/1/", nil)
+	r = mux.SetURLVars(r, map[string]string{"id": "1"})
+	return r
 }

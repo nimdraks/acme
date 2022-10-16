@@ -3,7 +3,7 @@ package dataservice
 type MockDataService struct {
 }
 
-func InitMockDataService(DSN string) *MockDataService {
+func InitMockDataService() *MockDataService {
 	return &MockDataService{}
 }
 

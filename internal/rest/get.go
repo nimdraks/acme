@@ -31,6 +31,7 @@ type GetHandler struct {
 // There are some programmer errors possible but hopefully these will be caught in testing.
 
 // ServeHTTP implements http.Handler
+
 func (s *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	// extract person id from request
 	id, err := extractID(request)
