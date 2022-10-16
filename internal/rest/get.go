@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 	"github.com/gorilla/mux"
 )
@@ -16,13 +17,21 @@ const (
 	defaultPersonID = 0
 )
 
+func NewGetHandle(d dataservice.DataService) *GetHandler {
+	return &GetHandler{dataService: d}
+}
+
+type GetHandler struct {
+	dataService dataservice.DataService
+}
+
 // GetHandler is the HTTP handler for the "Get Person" endpoint
 // In this simplified example we are assuming all possible errors are user errors and returning "bad request" HTTP 400
 // or "not found" HTTP 404
 // There are some programmer errors possible but hopefully these will be caught in testing.
 
 // ServeHTTP implements http.Handler
-func (s *Server) handlerGet(response http.ResponseWriter, request *http.Request) {
+func (s *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	// extract person id from request
 	id, err := extractID(request)
 	if err != nil {
@@ -31,7 +40,7 @@ func (s *Server) handlerGet(response http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	person, err := s.DataService.Load(id)
+	person, err := s.dataService.Load(id)
 
 	if err != nil {
 		// not need to log here as we can expect other layers to do so

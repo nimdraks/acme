@@ -13,7 +13,7 @@ func New(config *config.Config) *Server {
 	dataService := dataservice.InitDataService(config.DSN)
 	return &Server{
 		config:          config,
-		DataService:     dataService,
+		handlerGet:      NewGetHandle(dataService),
 		handlerList:     &ListHandler{},
 		handlerNotFound: notFoundHandler,
 		handlerRegister: &RegisterHandler{},
@@ -22,10 +22,10 @@ func New(config *config.Config) *Server {
 
 // Server is the HTTP REST server
 type Server struct {
-	server      *http.Server
-	config      *config.Config
-	DataService dataservice.DataService
+	server *http.Server
+	config *config.Config
 
+	handlerGet      http.Handler
 	handlerList     http.Handler
 	handlerNotFound http.HandlerFunc
 	handlerRegister http.Handler
@@ -58,7 +58,7 @@ func (s *Server) buildRouter() http.Handler {
 	router := mux.NewRouter()
 
 	// map URL endpoints to HTTP handlers
-	router.HandleFunc("/person/{id}/", s.handlerGet).Methods("GET")
+	router.Handle("/person/{id}/", s.handlerGet).Methods("GET")
 	router.Handle("/person/list", s.handlerList).Methods("GET")
 	router.Handle("/person/register", s.handlerRegister).Methods("POST")
 
