@@ -21,8 +21,23 @@ func TestGetHandler_Refactored(t *testing.T) {
 		{
 			desc:           "Happy path",
 			inRequest:      buildValidGetRequest(),
-			d:              dataservice.InitMockDataService(),
+			d:              dataservice.InitHappyMockDataService(),
 			expectedStatus: http.StatusOK,
+		}, {
+			desc:           "Invalid id case1",
+			inRequest:      buildInValidGetRequest(),
+			d:              dataservice.InitHappyMockDataService(),
+			expectedStatus: http.StatusBadRequest,
+		}, {
+			desc:           "Invalid id case2",
+			inRequest:      buildInValidGetRequest2(),
+			d:              dataservice.InitHappyMockDataService(),
+			expectedStatus: http.StatusBadRequest,
+		}, {
+			desc:           "Error from data service",
+			inRequest:      buildValidGetRequest(),
+			d:              dataservice.InitMockBadNotFoundDataService(),
+			expectedStatus: http.StatusNotFound,
 		},
 	} {
 		response := httptest.NewRecorder()
@@ -35,5 +50,17 @@ func TestGetHandler_Refactored(t *testing.T) {
 func buildValidGetRequest() *http.Request {
 	r, _ := http.NewRequest("GET", "/person/1/", nil)
 	r = mux.SetURLVars(r, map[string]string{"id": "1"})
+	return r
+}
+
+func buildInValidGetRequest() *http.Request {
+	r, _ := http.NewRequest("GET", "/person//", nil)
+	r = mux.SetURLVars(r, map[string]string{"id": ""})
+	return r
+}
+
+func buildInValidGetRequest2() *http.Request {
+	r, _ := http.NewRequest("GET", "/person/a/", nil)
+	r = mux.SetURLVars(r, map[string]string{"id": "a"})
 	return r
 }
