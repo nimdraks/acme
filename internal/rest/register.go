@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/register"
@@ -26,8 +27,11 @@ func (h *RegisterHandler) ServeHTTP(response http.ResponseWriter, request *http.
 		return
 	}
 
+	subCtx, cancel := context.WithTimeout(request.Context(), 1500*time.Millisecond)
+	defer cancel()
+
 	// register person
-	id, err := h.register(request.Context(), requestPayload)
+	id, err := h.register(subCtx, requestPayload)
 	if err != nil {
 		// not need to log here as we can expect other layers to do so
 		response.WriteHeader(http.StatusBadRequest)

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice/db"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
@@ -63,7 +64,11 @@ func populatePerson(scanner scanner) (*Person, error) {
 }
 
 func (d *SqlDBDataService) Load(ctx context.Context, id int) (*Person, error) {
-	row := d.db.Load(ctx, id)
+
+	subctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	row := d.db.Load(subctx, id)
 
 	// retrieve columns and populate the person object
 	out, err := populatePerson(row.Scan)

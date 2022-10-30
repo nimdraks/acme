@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
@@ -52,6 +53,11 @@ func (c *Converter) loadRateFromServer(ctx context.Context, currency string) (*h
 	req.Header.Set("apikey", "LYYUiDygZGXCdL5yTbHvV04GfdOOd4gn")
 
 	req = req.WithContext(ctx)
+
+	subCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	req = req.WithContext(subCtx)
 
 	// perform request
 	client := &(http.Client{})

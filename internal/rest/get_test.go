@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -43,7 +42,7 @@ func TestGetHandler_Refactored(t *testing.T) {
 	} {
 		response := httptest.NewRecorder()
 		handler := NewGetHandle(s.d)
-		handler.ServeHTTP(context.TODO(), response, s.inRequest)
+		handler.ServeHTTP(response, s.inRequest)
 		require.Equal(t, s.expectedStatus, response.Code)
 	}
 }
