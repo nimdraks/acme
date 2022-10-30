@@ -45,7 +45,7 @@ type Registerer struct {
 }
 
 // Do is API for this struct
-func (r *Registerer) Do(in *data.Person) (int, error) {
+func (r *Registerer) Do(ctx context.Context, in *data.Person) (int, error) {
 	// validate the request
 	err := r.validateInput(in)
 	if err != nil {
@@ -54,13 +54,13 @@ func (r *Registerer) Do(in *data.Person) (int, error) {
 	}
 
 	// get price in the requested currency
-	price, err := r.getPrice(in.Currency)
+	price, err := r.getPrice(ctx, in.Currency)
 	if err != nil {
 		return defaultPersonID, err
 	}
 
 	// save registration
-	id, err := r.save(in, price)
+	id, err := r.save(ctx, in, price)
 	if err != nil {
 		// no need to log here as we expect the data layer to do so
 		return defaultPersonID, err
@@ -90,9 +90,9 @@ func (r *Registerer) validateInput(in *data.Person) error {
 }
 
 // get price in the requested currency
-func (r *Registerer) getPrice(currency string) (float64, error) {
+func (r *Registerer) getPrice(ctx context.Context, currency string) (float64, error) {
 	converter := &exchange.Converter{}
-	price, err := converter.Do(config.App.BasePrice, currency)
+	price, err := converter.Do(ctx, config.App.BasePrice, currency)
 	if err != nil {
 		logging.L.Warn("failed to convert the price. err: %s", err)
 		return defaultPersonID, err
@@ -102,12 +102,12 @@ func (r *Registerer) getPrice(currency string) (float64, error) {
 }
 
 // save the registration
-func (r *Registerer) save(in *data.Person, price float64) (int, error) {
+func (r *Registerer) save(ctx context.Context, in *data.Person, price float64) (int, error) {
 	person := &data.Person{
 		FullName: in.FullName,
 		Phone:    in.Phone,
 		Currency: in.Currency,
 		Price:    price,
 	}
-	return data.Save(context.TODO(), person)
+	return data.Save(ctx, person)
 }

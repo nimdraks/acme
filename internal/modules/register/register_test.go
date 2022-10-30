@@ -1,6 +1,7 @@
 package register
 
 import (
+	"context"
 	"testing"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
@@ -18,7 +19,7 @@ func TestRegisterer_Do(t *testing.T) {
 
 	// call method
 	registerer := &Registerer{}
-	ID, err := registerer.Do(in)
+	ID, err := registerer.Do(context.TODO(), in)
 
 	// validate expectations
 	require.NoError(t, err)

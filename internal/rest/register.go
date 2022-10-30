@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,7 +27,7 @@ func (h *RegisterHandler) ServeHTTP(response http.ResponseWriter, request *http.
 	}
 
 	// register person
-	id, err := h.register(requestPayload)
+	id, err := h.register(request.Context(), requestPayload)
 	if err != nil {
 		// not need to log here as we can expect other layers to do so
 		response.WriteHeader(http.StatusBadRequest)
@@ -52,7 +53,7 @@ func (h *RegisterHandler) extractPayload(request *http.Request) (*registerReques
 }
 
 // call the logic layer
-func (h *RegisterHandler) register(requestPayload *registerRequest) (int, error) {
+func (h *RegisterHandler) register(ctx context.Context, requestPayload *registerRequest) (int, error) {
 	person := &data.Person{
 		FullName: requestPayload.FullName,
 		Phone:    requestPayload.Phone,
@@ -60,7 +61,7 @@ func (h *RegisterHandler) register(requestPayload *registerRequest) (int, error)
 	}
 
 	registerer := &register.Registerer{}
-	return registerer.Do(person)
+	return registerer.Do(ctx, person)
 }
 
 // register endpoint request format

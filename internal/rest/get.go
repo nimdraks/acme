@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -42,7 +41,7 @@ func (s *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	person, err := s.dataService.Load(context.TODO(), id)
+	person, err := s.dataService.Load(request.Context(), id)
 
 	if err != nil {
 		// not need to log here as we can expect other layers to do so

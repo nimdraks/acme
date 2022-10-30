@@ -1,6 +1,7 @@
 package exchange
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -25,9 +26,9 @@ const (
 type Converter struct{}
 
 // Do will perform the conversion
-func (c *Converter) Do(basePrice float64, currency string) (float64, error) {
+func (c *Converter) Do(ctx context.Context, basePrice float64, currency string) (float64, error) {
 	// load rate from the external API
-	response, err := c.loadRateFromServer(currency)
+	response, err := c.loadRateFromServer(ctx, currency)
 	if err != nil {
 		return defaultPrice, err
 	}
@@ -43,12 +44,14 @@ func (c *Converter) Do(basePrice float64, currency string) (float64, error) {
 }
 
 // load rate from the external API
-func (c *Converter) loadRateFromServer(currency string) (*http.Response, error) {
+func (c *Converter) loadRateFromServer(ctx context.Context, currency string) (*http.Response, error) {
 	// build the request
 	url := fmt.Sprintf(urlFormat,
 		config.App.ExchangeRateBaseURL)
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("apikey", "LYYUiDygZGXCdL5yTbHvV04GfdOOd4gn")
+
+	req = req.WithContext(ctx)
 
 	// perform request
 	client := &(http.Client{})
