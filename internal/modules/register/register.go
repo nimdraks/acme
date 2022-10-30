@@ -1,6 +1,7 @@
 package register
 
 import (
+	"context"
 	"errors"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
@@ -108,5 +109,5 @@ func (r *Registerer) save(in *data.Person, price float64) (int, error) {
 		Currency: in.Currency,
 		Price:    price,
 	}
-	return data.Save(person)
+	return data.Save(context.TODO(), person)
 }

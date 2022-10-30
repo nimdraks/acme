@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -78,7 +79,7 @@ func (p *Person) WriteJson(writer io.Writer) error {
 
 // Save will save the supplied person and return the ID of the newly created person or an error.
 // Errors returned are caused by the underlying database or our connection to it.
-func Save(in *Person) (int, error) {
+func Save(ctx context.Context, in *Person) (int, error) {
 	db, err := getDB()
 	if err != nil {
 		logging.L.Error("failed to get DB connection. err: %s", err)
@@ -87,7 +88,7 @@ func Save(in *Person) (int, error) {
 
 	// perform DB insert
 	query := "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
-	result, err := db.Exec(query, in.FullName, in.Phone, in.Currency, in.Price)
+	result, err := db.ExecContext(ctx, query, in.FullName, in.Phone, in.Currency, in.Price)
 	if err != nil {
 		logging.L.Error("failed to save person into DB. err: %s", err)
 		return defaultPersonID, err
