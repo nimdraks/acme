@@ -1,6 +1,9 @@
 package db
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 const (
 	// default person id (returned on error)
@@ -8,7 +11,7 @@ const (
 )
 
 type DBService interface {
-	Save(fullName, phone, currency, price string) (int, error)
-	Load(ID int) *sql.Row
-	LoadAll() (*sql.Rows, error)
+	Save(ctx context.Context, fullName, phone, currency, price string) (int, error)
+	Load(ctx context.Context, ID int) *sql.Row
+	LoadAll(ctx context.Context) (*sql.Rows, error)
 }

@@ -1,6 +1,7 @@
 package dataservice
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"io"
@@ -61,8 +62,8 @@ func populatePerson(scanner scanner) (*Person, error) {
 	return out, err
 }
 
-func (d *SqlDBDataService) Load(id int) (*Person, error) {
-	row := d.db.Load(id)
+func (d *SqlDBDataService) Load(ctx context.Context, id int) (*Person, error) {
+	row := d.db.Load(ctx, id)
 
 	// retrieve columns and populate the person object
 	out, err := populatePerson(row.Scan)
@@ -78,8 +79,8 @@ func (d *SqlDBDataService) Load(id int) (*Person, error) {
 	return out, nil
 }
 
-func (d *SqlDBDataService) LoadAll() ([]*Person, error) {
-	rows, err := d.db.LoadAll()
+func (d *SqlDBDataService) LoadAll(ctx context.Context) ([]*Person, error) {
+	rows, err := d.db.LoadAll(ctx)
 	if err != nil {
 		return nil, err
 
@@ -111,7 +112,7 @@ func (d *SqlDBDataService) LoadAll() ([]*Person, error) {
 
 }
 
-func (d *SqlDBDataService) Save(fullName, phone, currency, price string) int {
-	id, _ := d.db.Save(fullName, phone, currency, price)
+func (d *SqlDBDataService) Save(ctx context.Context, fullName, phone, currency, price string) int {
+	id, _ := d.db.Save(ctx, fullName, phone, currency, price)
 	return id
 }

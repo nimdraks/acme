@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
@@ -23,20 +24,20 @@ func InitDBService(DSN string) *SqlDB {
 	return &SqlDB{sql: db}
 }
 
-func (d *SqlDB) Load(ID int) *sql.Row {
+func (d *SqlDB) Load(ctx context.Context, ID int) *sql.Row {
 	// perform DB select
 	query := "SELECT id, fullname, phone, currency, price FROM person WHERE id = ? LIMIT 1"
-	row := d.sql.QueryRow(query, ID)
+	row := d.sql.QueryRowContext(ctx, query, ID)
 	return row
 }
 
 // LoadAll will attempt to load all people in the database
 // It will return ErrNotFound when there are not people in the database
 // Any other errors returned are caused by the underlying database or our connection to it.
-func (d *SqlDB) LoadAll() (*sql.Rows, error) {
+func (d *SqlDB) LoadAll(ctx context.Context) (*sql.Rows, error) {
 	// perform DB select
 	query := "SELECT id, fullname, phone, currency, price FROM person"
-	rows, err := d.sql.Query(query)
+	rows, err := d.sql.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -45,10 +46,10 @@ func (d *SqlDB) LoadAll() (*sql.Rows, error) {
 
 // Save will save the supplied person and return the ID of the newly created person or an error.
 // Errors returned are caused by the underlying database or our connection to it.
-func (d *SqlDB) Save(fullName, phone, currency, price string) (int, error) {
+func (d *SqlDB) Save(ctx context.Context, fullName, phone, currency, price string) (int, error) {
 	// perform DB insert
 	query := "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
-	result, err := d.sql.Exec(query, fullName, phone, currency, price)
+	result, err := d.sql.ExecContext(ctx, query, fullName, phone, currency, price)
 	if err != nil {
 		logging.L.Error("failed to save person into DB. err: %s", err)
 		return defaultPersonID, err
