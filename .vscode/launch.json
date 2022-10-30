@@ -12,7 +12,7 @@
             "mode": "auto",
             "program": "main.go",
             "env" : {
-               "ACME_CONFIG" : "C:\\Users\\nimdr\\Documents\\vscode\\acme\\acme\\config.json"
+               "ACME_CONFIG" : "C:\\Users\\가족\\Documents\\vscode\\acme\\acme\\config.json"
             }
         }
     ]
