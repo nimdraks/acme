@@ -1,24 +1,29 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/list"
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 )
 
 // ListHandler is the HTTP handler for the "List Do people" endpoint
 // In this simplified example we are assuming all possible errors are system errors (HTTP 500)
+
+func NewListHandler(d dataservice.DataService) *ListHandler {
+	return &ListHandler{dataService: d}
+}
+
 type ListHandler struct {
+	dataService dataservice.DataService
 }
 
 // ServeHTTP implements http.Handler
 func (h *ListHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	// attempt loadAll
-	lister := list.Lister{}
-	people, err := lister.Do()
+	people, err := h.dataService.LoadAll(context.TODO())
 	if err != nil {
 		// not need to log here as we can expect other layers to do so
 		response.WriteHeader(http.StatusNotFound)
@@ -34,7 +39,7 @@ func (h *ListHandler) ServeHTTP(response http.ResponseWriter, request *http.Requ
 }
 
 // output the result as JSON
-func (h *ListHandler) writeJSON(writer io.Writer, people []*data.Person) error {
+func (h *ListHandler) writeJSON(writer io.Writer, people []*dataservice.Person) error {
 	output := &listResponseFormat{
 		People: make([]*listResponseItemFormat, len(people)),
 	}

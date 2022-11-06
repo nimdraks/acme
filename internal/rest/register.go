@@ -27,7 +27,7 @@ func (h *RegisterHandler) ServeHTTP(response http.ResponseWriter, request *http.
 		return
 	}
 
-	subCtx, cancel := context.WithTimeout(request.Context(), 1500*time.Millisecond)
+	subCtx, cancel := context.WithTimeout(request.Context(), 15000*time.Millisecond)
 	defer cancel()
 
 	// register person

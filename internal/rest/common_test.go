@@ -27,7 +27,7 @@ func startServer(ctx context.Context) (string, *Server, error) {
 	}
 
 	// start a server
-	config := config.Config{Address: address}
+	config := config.Config{Address: address, DSN: config.App.DSN}
 	server := New(&config)
 	go server.Listen(ctx.Done())
 

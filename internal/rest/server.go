@@ -14,7 +14,7 @@ func New(config *config.Config) *Server {
 	return &Server{
 		config:          config,
 		handlerGet:      NewGetHandle(dataService),
-		handlerList:     &ListHandler{},
+		handlerList:     NewListHandler(dataService),
 		handlerNotFound: notFoundHandler,
 		handlerRegister: &RegisterHandler{},
 	}
