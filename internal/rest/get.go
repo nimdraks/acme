@@ -1,11 +1,13 @@
 package rest
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
@@ -33,6 +35,9 @@ type GetHandler struct {
 // ServeHTTP implements http.Handler
 
 func (s *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	subCtx, cancel := context.WithTimeout(request.Context(), 15000*time.Millisecond)
+	defer cancel()
+
 	// extract person id from request
 	id, err := extractID(request)
 	if err != nil {
@@ -41,7 +46,7 @@ func (s *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	person, err := s.dataService.Load(request.Context(), id)
+	person, err := s.dataService.Load(subCtx, id)
 
 	if err != nil {
 		// not need to log here as we can expect other layers to do so

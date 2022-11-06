@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 )
@@ -22,8 +23,11 @@ type ListHandler struct {
 
 // ServeHTTP implements http.Handler
 func (h *ListHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	subCtx, cancel := context.WithTimeout(request.Context(), 15000*time.Millisecond)
+	defer cancel()
+
 	// attempt loadAll
-	people, err := h.dataService.LoadAll(context.TODO())
+	people, err := h.dataService.LoadAll(subCtx)
 	if err != nil {
 		// not need to log here as we can expect other layers to do so
 		response.WriteHeader(http.StatusNotFound)
