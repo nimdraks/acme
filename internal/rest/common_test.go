@@ -3,8 +3,6 @@ package rest
 import (
 	"context"
 	"net"
-
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 )
 
 func getOpenPort() (string, error) {
@@ -19,6 +17,19 @@ func getOpenPort() (string, error) {
 	return address, nil
 }
 
+type MockConfig struct {
+	mockDSN  string
+	mockAddr string
+}
+
+func (m *MockConfig) GetDSN() string {
+	return m.mockDSN
+}
+
+func (m *MockConfig) GetAddress() string {
+	return m.mockAddr
+}
+
 func startServer(ctx context.Context) (string, *Server, error) {
 	// get open port
 	address, err := getOpenPort()
@@ -27,8 +38,7 @@ func startServer(ctx context.Context) (string, *Server, error) {
 	}
 
 	// start a server
-	config := config.Config{Address: address, DSN: config.App.DSN}
-	server := New(&config)
+	server := New(&MockConfig{mockAddr: address, mockDSN: "root:1234@tcp(127.0.0.1:3306)/acme"})
 	go server.Listen(ctx.Done())
 
 	// wait for server to be ready

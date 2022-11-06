@@ -32,6 +32,26 @@ type Config struct {
 	ExchangeRateAPIKey string
 }
 
+func (c *Config) GetDSN() string {
+	return c.DSN
+}
+
+func (c *Config) GetAddress() string {
+	return c.Address
+}
+
+func (c *Config) GetBasePrice() float64 {
+	return c.BasePrice
+}
+
+func (c *Config) GetExchangeRateBaseURL() string {
+	return c.ExchangeRateBaseURL
+}
+
+func (c *Config) GetExchangeRateAPIKey() string {
+	return c.ExchangeRateAPIKey
+}
+
 // Load returns the config loaded from environment
 func init() {
 	filename, found := os.LookupEnv(DefaultEnvVar)

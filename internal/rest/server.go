@@ -3,14 +3,18 @@ package rest
 import (
 	"net/http"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/gorilla/mux"
 )
 
+type Config interface {
+	GetDSN() string
+	GetAddress() string
+}
+
 // New will create and initialize the server
-func New(config *config.Config) *Server {
-	dataService := dataservice.InitDataService(config.DSN)
+func New(config Config) *Server {
+	dataService := dataservice.InitDataService(config.GetDSN())
 	return &Server{
 		config:          config,
 		handlerGet:      NewGetHandle(dataService),
@@ -23,7 +27,7 @@ func New(config *config.Config) *Server {
 // Server is the HTTP REST server
 type Server struct {
 	server *http.Server
-	config *config.Config
+	config Config
 
 	handlerGet      http.Handler
 	handlerList     http.Handler
@@ -38,7 +42,7 @@ func (s *Server) Listen(stop <-chan struct{}) {
 	// create the HTTP server
 	s.server = &http.Server{
 		Handler: router,
-		Addr:    s.config.Address,
+		Addr:    s.config.GetAddress(),
 	}
 
 	// listen for shutdown
