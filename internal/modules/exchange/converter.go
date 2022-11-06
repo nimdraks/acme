@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 )
 
@@ -24,7 +23,19 @@ const (
 
 // Converter will convert the base price to the currency supplied
 // Note: we are expecting sane inputs and therefore skipping input validation
-type Converter struct{}
+type Config interface {
+	GetBasePrice() float64
+	GetExchangeRateBaseURL() string
+	GetExchangeRateAPIKey() string
+}
+
+type Converter struct {
+	config Config
+}
+
+func NewConverter(config Config) *Converter {
+	return &Converter{config: config}
+}
 
 // Do will perform the conversion
 func (c *Converter) Do(ctx context.Context, basePrice float64, currency string) (float64, error) {
@@ -48,7 +59,7 @@ func (c *Converter) Do(ctx context.Context, basePrice float64, currency string) 
 func (c *Converter) loadRateFromServer(ctx context.Context, currency string) (*http.Response, error) {
 	// build the request
 	url := fmt.Sprintf(urlFormat,
-		config.App.ExchangeRateBaseURL)
+		c.config.GetExchangeRateBaseURL())
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("apikey", "LYYUiDygZGXCdL5yTbHvV04GfdOOd4gn")
 

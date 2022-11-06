@@ -10,6 +10,9 @@ import (
 type Config interface {
 	GetDSN() string
 	GetAddress() string
+	GetBasePrice() float64
+	GetExchangeRateBaseURL() string
+	GetExchangeRateAPIKey() string
 }
 
 // New will create and initialize the server
@@ -20,7 +23,7 @@ func New(config Config) *Server {
 		handlerGet:      NewGetHandle(dataService),
 		handlerList:     NewListHandler(dataService),
 		handlerNotFound: notFoundHandler,
-		handlerRegister: &RegisterHandler{},
+		handlerRegister: NewRegisterHandler(config),
 	}
 }
 

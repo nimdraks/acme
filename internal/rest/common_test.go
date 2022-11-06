@@ -30,6 +30,16 @@ func (m *MockConfig) GetAddress() string {
 	return m.mockAddr
 }
 
+func (m *MockConfig) GetBasePrice() float64 {
+	return 100
+}
+func (m *MockConfig) GetExchangeRateBaseURL() string {
+	return "https://api.apilayer.com/currency_data"
+}
+func (m *MockConfig) GetExchangeRateAPIKey() string {
+	return "KqLgYfBfNgCgGfHG6UFdJWp3qOdaoGYc"
+}
+
 func startServer(ctx context.Context) (string, *Server, error) {
 	// get open port
 	address, err := getOpenPort()

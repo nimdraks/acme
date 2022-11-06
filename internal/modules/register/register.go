@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/exchange"
@@ -41,7 +40,18 @@ var (
 // -the currency is invalid
 // -the exchange rate cannot be loaded
 // -the data layer throws an error.
+type Config interface {
+	GetBasePrice() float64
+	GetExchangeRateBaseURL() string
+	GetExchangeRateAPIKey() string
+}
+
 type Registerer struct {
+	config Config
+}
+
+func NewRegisterer(config Config) *Registerer {
+	return &Registerer{config: config}
 }
 
 // Do is API for this struct
@@ -91,8 +101,7 @@ func (r *Registerer) validateInput(in *data.Person) error {
 
 // get price in the requested currency
 func (r *Registerer) getPrice(ctx context.Context, currency string) (float64, error) {
-	converter := &exchange.Converter{}
-	price, err := converter.Do(ctx, config.App.BasePrice, currency)
+	price, err := exchange.NewConverter(r.config).Do(ctx, r.config.GetBasePrice(), currency)
 	if err != nil {
 		logging.L.Warn("failed to convert the price. err: %s", err)
 		return defaultPersonID, err

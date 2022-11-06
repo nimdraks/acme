@@ -9,6 +9,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type mockConfig struct{}
+
+func (m *mockConfig) GetBasePrice() float64 {
+	return 100
+}
+func (m *mockConfig) GetExchangeRateBaseURL() string {
+	return "https://api.apilayer.com/currency_data"
+}
+func (m *mockConfig) GetExchangeRateAPIKey() string {
+	return "KqLgYfBfNgCgGfHG6UFdJWp3qOdaoGYc"
+}
+
 func TestRegisterer_Do(t *testing.T) {
 	// inputs
 	in := &data.Person{
@@ -18,7 +30,7 @@ func TestRegisterer_Do(t *testing.T) {
 	}
 
 	// call method
-	registerer := &Registerer{}
+	registerer := NewRegisterer(&mockConfig{})
 	ID, err := registerer.Do(context.TODO(), in)
 
 	// validate expectations
