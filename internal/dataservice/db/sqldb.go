@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type SqlDB struct {
