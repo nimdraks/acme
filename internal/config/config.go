@@ -32,6 +32,26 @@ type Config struct {
 	ExchangeRateAPIKey string
 }
 
+func (c *Config) GetDSN() string {
+	return c.DSN
+}
+
+func (c *Config) GetAddress() string {
+	return c.Address
+}
+
+func (c *Config) GetBasePrice() float64 {
+	return c.BasePrice
+}
+
+func (c *Config) GetExchangeRateBaseURL() string {
+	return c.ExchangeRateBaseURL
+}
+
+func (c *Config) GetExchangeRateAPIKey() string {
+	return c.ExchangeRateAPIKey
+}
+
 // Load returns the config loaded from environment
 func init() {
 	filename, found := os.LookupEnv(DefaultEnvVar)
@@ -58,4 +78,26 @@ func load(filename string) error {
 	}
 
 	return nil
+}
+
+func Load(filename string) *Config {
+	if filename == "" {
+		logging.L.Error("Empty filename")
+		return nil
+	}
+
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		logging.L.Error("failed to read config file. err: %s", err)
+		return nil
+	}
+
+	config := &Config{}
+	err = json.Unmarshal(bytes, config)
+	if err != nil {
+		logging.L.Error("failed to parse config file. err : %s", err)
+		return nil
+	}
+
+	return config
 }

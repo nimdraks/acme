@@ -1,9 +1,9 @@
 package register
 
 import (
+	"context"
 	"errors"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/exchange"
@@ -40,11 +40,22 @@ var (
 // -the currency is invalid
 // -the exchange rate cannot be loaded
 // -the data layer throws an error.
+type Config interface {
+	GetBasePrice() float64
+	GetExchangeRateBaseURL() string
+	GetExchangeRateAPIKey() string
+}
+
 type Registerer struct {
+	config Config
+}
+
+func NewRegisterer(config Config) *Registerer {
+	return &Registerer{config: config}
 }
 
 // Do is API for this struct
-func (r *Registerer) Do(in *data.Person) (int, error) {
+func (r *Registerer) Do(ctx context.Context, in *data.Person) (int, error) {
 	// validate the request
 	err := r.validateInput(in)
 	if err != nil {
@@ -53,13 +64,13 @@ func (r *Registerer) Do(in *data.Person) (int, error) {
 	}
 
 	// get price in the requested currency
-	price, err := r.getPrice(in.Currency)
+	price, err := r.getPrice(ctx, in.Currency)
 	if err != nil {
 		return defaultPersonID, err
 	}
 
 	// save registration
-	id, err := r.save(in, price)
+	id, err := r.save(ctx, in, price)
 	if err != nil {
 		// no need to log here as we expect the data layer to do so
 		return defaultPersonID, err
@@ -89,9 +100,8 @@ func (r *Registerer) validateInput(in *data.Person) error {
 }
 
 // get price in the requested currency
-func (r *Registerer) getPrice(currency string) (float64, error) {
-	converter := &exchange.Converter{}
-	price, err := converter.Do(config.App.BasePrice, currency)
+func (r *Registerer) getPrice(ctx context.Context, currency string) (float64, error) {
+	price, err := exchange.NewConverter(r.config).Do(ctx, r.config.GetBasePrice(), currency)
 	if err != nil {
 		logging.L.Warn("failed to convert the price. err: %s", err)
 		return defaultPersonID, err
@@ -101,12 +111,12 @@ func (r *Registerer) getPrice(currency string) (float64, error) {
 }
 
 // save the registration
-func (r *Registerer) save(in *data.Person, price float64) (int, error) {
+func (r *Registerer) save(ctx context.Context, in *data.Person, price float64) (int, error) {
 	person := &data.Person{
 		FullName: in.FullName,
 		Phone:    in.Phone,
 		Currency: in.Currency,
 		Price:    price,
 	}
-	return data.Save(person)
+	return data.Save(ctx, person)
 }

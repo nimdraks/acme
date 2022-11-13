@@ -16,7 +16,7 @@ func TestNotFoundHandler_ServeHTTP(t *testing.T) {
 
 	// Create and start a server
 	// With out current implementation, we cannot test this handler without a full server as we need the mux.
-	address, err := startServer(ctx)
+	address, _, err := startServer(ctx)
 	require.NoError(t, err)
 
 	// build inputs

@@ -17,15 +17,38 @@ func getOpenPort() (string, error) {
 	return address, nil
 }
 
-func startServer(ctx context.Context) (string, error) {
+type MockConfig struct {
+	mockDSN  string
+	mockAddr string
+}
+
+func (m *MockConfig) GetDSN() string {
+	return m.mockDSN
+}
+
+func (m *MockConfig) GetAddress() string {
+	return m.mockAddr
+}
+
+func (m *MockConfig) GetBasePrice() float64 {
+	return 100
+}
+func (m *MockConfig) GetExchangeRateBaseURL() string {
+	return "https://api.apilayer.com/currency_data"
+}
+func (m *MockConfig) GetExchangeRateAPIKey() string {
+	return "KqLgYfBfNgCgGfHG6UFdJWp3qOdaoGYc"
+}
+
+func startServer(ctx context.Context) (string, *Server, error) {
 	// get open port
 	address, err := getOpenPort()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	// start a server
-	server := New(address)
+	server := New(&MockConfig{mockAddr: address, mockDSN: "root:1234@tcp(127.0.0.1:3306)/acme"})
 	go server.Listen(ctx.Done())
 
 	// wait for server to be ready
@@ -35,17 +58,17 @@ func startServer(ctx context.Context) (string, error) {
 		if conn != nil {
 			defer conn.Close()
 
-			return address, nil
+			return address, server, nil
 		}
 
 		select {
 		case <-ctx.Done():
-			return "", ctx.Err()
+			return "", nil, ctx.Err()
 
 		default:
 			// try again
 		}
 	}
 
-	return address, nil
+	return address, server, nil
 }

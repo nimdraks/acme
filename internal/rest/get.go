@@ -1,16 +1,16 @@
 package rest
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/get"
 	"github.com/gorilla/mux"
 )
 
@@ -19,26 +19,35 @@ const (
 	defaultPersonID = 0
 )
 
+func NewGetHandle(d dataservice.DataService) *GetHandler {
+	return &GetHandler{dataService: d}
+}
+
+type GetHandler struct {
+	dataService dataservice.DataService
+}
+
 // GetHandler is the HTTP handler for the "Get Person" endpoint
 // In this simplified example we are assuming all possible errors are user errors and returning "bad request" HTTP 400
 // or "not found" HTTP 404
 // There are some programmer errors possible but hopefully these will be caught in testing.
-type GetHandler struct {
-}
 
 // ServeHTTP implements http.Handler
-func (h *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+
+func (s *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	subCtx, cancel := context.WithTimeout(request.Context(), 15000*time.Millisecond)
+	defer cancel()
+
 	// extract person id from request
-	id, err := h.extractID(request)
+	id, err := extractID(request)
 	if err != nil {
 		// output error
 		response.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// attempt get
-	getter := get.Getter{}
-	person, err := getter.Do(id)
+	person, err := s.dataService.Load(subCtx, id)
+
 	if err != nil {
 		// not need to log here as we can expect other layers to do so
 		response.WriteHeader(http.StatusNotFound)
@@ -46,7 +55,7 @@ func (h *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Reque
 	}
 
 	// happy path
-	err = h.writeJSON(response, person)
+	err = writeJSON(response, person)
 	if err != nil {
 		// this error should not happen but if it does there is nothing we can do to recover
 		response.WriteHeader(http.StatusInternalServerError)
@@ -54,7 +63,7 @@ func (h *GetHandler) ServeHTTP(response http.ResponseWriter, request *http.Reque
 }
 
 // extract the person ID from the request
-func (h *GetHandler) extractID(request *http.Request) (int, error) {
+func extractID(request *http.Request) (int, error) {
 	// ID is part of the URL, so we extract it from there
 	vars := mux.Vars(request)
 	idAsString, exists := vars["id"]
@@ -77,25 +86,11 @@ func (h *GetHandler) extractID(request *http.Request) (int, error) {
 	return id, nil
 }
 
-// output the supplied person as JSON
-func (h *GetHandler) writeJSON(writer io.Writer, person *data.Person) error {
-	output := &getResponseFormat{
-		ID:       person.ID,
-		FullName: person.FullName,
-		Phone:    person.Phone,
-		Currency: person.Currency,
-		Price:    person.Price,
-	}
-
-	// call to http.ResponseWriter.Write() will cause HTTP OK (200) to be output as well
-	return json.NewEncoder(writer).Encode(output)
+type writeReponseJson interface {
+	WriteJson(writer io.Writer) error
 }
 
-// the JSON response format
-type getResponseFormat struct {
-	ID       int     `json:"id"`
-	FullName string  `json:"name"`
-	Phone    string  `json:"phone"`
-	Currency string  `json:"currency"`
-	Price    float64 `json:"price"`
+// output the supplied person as JSON
+func writeJSON(writer io.Writer, data writeReponseJson) error {
+	return data.WriteJson(writer)
 }

@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/register"
@@ -13,6 +15,11 @@ import (
 // In this simplified example we are assuming all possible errors are user errors and returning "bad request" HTTP 400.
 // There are some programmer errors possible but hopefully these will be caught in testing.
 type RegisterHandler struct {
+	config Config
+}
+
+func NewRegisterHandler(c Config) *RegisterHandler {
+	return &RegisterHandler{config: c}
 }
 
 // ServeHTTP implements http.Handler
@@ -25,8 +32,11 @@ func (h *RegisterHandler) ServeHTTP(response http.ResponseWriter, request *http.
 		return
 	}
 
+	subCtx, cancel := context.WithTimeout(request.Context(), 15000*time.Millisecond)
+	defer cancel()
+
 	// register person
-	id, err := h.register(requestPayload)
+	id, err := h.register(subCtx, requestPayload)
 	if err != nil {
 		// not need to log here as we can expect other layers to do so
 		response.WriteHeader(http.StatusBadRequest)
@@ -52,15 +62,14 @@ func (h *RegisterHandler) extractPayload(request *http.Request) (*registerReques
 }
 
 // call the logic layer
-func (h *RegisterHandler) register(requestPayload *registerRequest) (int, error) {
+func (h *RegisterHandler) register(ctx context.Context, requestPayload *registerRequest) (int, error) {
 	person := &data.Person{
 		FullName: requestPayload.FullName,
 		Phone:    requestPayload.Phone,
 		Currency: requestPayload.Currency,
 	}
 
-	registerer := &register.Registerer{}
-	return registerer.Do(person)
+	return register.NewRegisterer(h.config).Do(ctx, person)
 }
 
 // register endpoint request format

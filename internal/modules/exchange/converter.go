@@ -1,19 +1,21 @@
 package exchange
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"net/http"
+	"time"
 
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 )
 
+// https://apilayer.com/marketplace/currency_data-api#
 const (
 	// request URL for the exchange rate API
-	urlFormat = "%s/api/historical?access_key=%s&date=2018-06-20&currencies=%s"
+	urlFormat = "%s/historical?date=2018-06-20"
 
 	// default price that is sent when an error occurs
 	defaultPrice = 0.0
@@ -21,12 +23,24 @@ const (
 
 // Converter will convert the base price to the currency supplied
 // Note: we are expecting sane inputs and therefore skipping input validation
-type Converter struct{}
+type Config interface {
+	GetBasePrice() float64
+	GetExchangeRateBaseURL() string
+	GetExchangeRateAPIKey() string
+}
+
+type Converter struct {
+	config Config
+}
+
+func NewConverter(config Config) *Converter {
+	return &Converter{config: config}
+}
 
 // Do will perform the conversion
-func (c *Converter) Do(basePrice float64, currency string) (float64, error) {
+func (c *Converter) Do(ctx context.Context, basePrice float64, currency string) (float64, error) {
 	// load rate from the external API
-	response, err := c.loadRateFromServer(currency)
+	response, err := c.loadRateFromServer(ctx, currency)
 	if err != nil {
 		return defaultPrice, err
 	}
@@ -42,15 +56,23 @@ func (c *Converter) Do(basePrice float64, currency string) (float64, error) {
 }
 
 // load rate from the external API
-func (c *Converter) loadRateFromServer(currency string) (*http.Response, error) {
+func (c *Converter) loadRateFromServer(ctx context.Context, currency string) (*http.Response, error) {
 	// build the request
 	url := fmt.Sprintf(urlFormat,
-		config.App.ExchangeRateBaseURL,
-		config.App.ExchangeRateAPIKey,
-		currency)
+		c.config.GetExchangeRateBaseURL())
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("apikey", "LYYUiDygZGXCdL5yTbHvV04GfdOOd4gn")
+
+	req = req.WithContext(ctx)
+
+	subCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	req = req.WithContext(subCtx)
 
 	// perform request
-	response, err := http.Get(url)
+	client := &(http.Client{})
+	response, err := client.Do(req)
 	if err != nil {
 		logging.L.Warn("[exchange] failed to load. err: %s", err)
 		return nil, err

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,7 @@ func TestData_happyPath(t *testing.T) {
 	}
 
 	// save
-	resultID, err := Save(in)
+	resultID, err := Save(context.TODO(), in)
 	require.Nil(t, err)
 	assert.True(t, resultID > 0)
 

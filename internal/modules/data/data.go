@@ -1,11 +1,15 @@
 package data
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"io"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/config"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
+
 	// import the MySQL Driver
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -53,9 +57,29 @@ type Person struct {
 	Price float64
 }
 
+func (p *Person) WriteJson(writer io.Writer) error {
+	// the JSON response format
+	type getResponseFormat struct {
+		ID       int     `json:"id"`
+		FullName string  `json:"name"`
+		Phone    string  `json:"phone"`
+		Currency string  `json:"currency"`
+		Price    float64 `json:"price"`
+	}
+
+	output := &getResponseFormat{
+		ID:       p.ID,
+		FullName: p.FullName,
+		Phone:    p.Phone,
+		Currency: p.Currency,
+		Price:    p.Price,
+	}
+	return json.NewEncoder(writer).Encode(output)
+}
+
 // Save will save the supplied person and return the ID of the newly created person or an error.
 // Errors returned are caused by the underlying database or our connection to it.
-func Save(in *Person) (int, error) {
+func Save(ctx context.Context, in *Person) (int, error) {
 	db, err := getDB()
 	if err != nil {
 		logging.L.Error("failed to get DB connection. err: %s", err)
@@ -64,7 +88,7 @@ func Save(in *Person) (int, error) {
 
 	// perform DB insert
 	query := "INSERT INTO person (fullname, phone, currency, price) VALUES (?, ?, ?, ?)"
-	result, err := db.Exec(query, in.FullName, in.Phone, in.Currency, in.Price)
+	result, err := db.ExecContext(ctx, query, in.FullName, in.Phone, in.Currency, in.Price)
 	if err != nil {
 		logging.L.Error("failed to save person into DB. err: %s", err)
 		return defaultPersonID, err
