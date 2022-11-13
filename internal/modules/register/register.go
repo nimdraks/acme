@@ -7,7 +7,6 @@ import (
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/exchange"
 )
 
@@ -58,7 +57,7 @@ func NewRegisterer(config Config, d dataservice.DataService) *Registerer {
 }
 
 // Do is API for this struct
-func (r *Registerer) Do(ctx context.Context, in *data.Person) (int, error) {
+func (r *Registerer) Do(ctx context.Context, in *dataservice.Person) (int, error) {
 	// validate the request
 	err := r.validateInput(in)
 	if err != nil {
@@ -83,7 +82,7 @@ func (r *Registerer) Do(ctx context.Context, in *data.Person) (int, error) {
 }
 
 // validate input and return error on fail
-func (r *Registerer) validateInput(in *data.Person) error {
+func (r *Registerer) validateInput(in *dataservice.Person) error {
 	if in.FullName == "" {
 		return errNameMissing
 	}
@@ -114,7 +113,7 @@ func (r *Registerer) getPrice(ctx context.Context, currency string) (float64, er
 }
 
 // save the registration
-func (r *Registerer) save(ctx context.Context, in *data.Person, price float64) (int, error) {
+func (r *Registerer) save(ctx context.Context, in *dataservice.Person, price float64) (int, error) {
 	result := r.dataService.Save(ctx, in.FullName, in.Phone, in.Currency, fmt.Sprintf("%f", price))
 	if result < 0 {
 		return result, fmt.Errorf("Error")

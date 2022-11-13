@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/register"
 )
 
@@ -65,7 +64,7 @@ func (h *RegisterHandler) extractPayload(request *http.Request) (*registerReques
 
 // call the logic layer
 func (h *RegisterHandler) register(ctx context.Context, requestPayload *registerRequest) (int, error) {
-	person := &data.Person{
+	person := &dataservice.Person{
 		FullName: requestPayload.FullName,
 		Phone:    requestPayload.Phone,
 		Currency: requestPayload.Currency,

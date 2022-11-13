@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
-	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -41,7 +40,7 @@ func (m *mockInConfig) GetExchangeRateAPIKey() string {
 }
 func TestRegisterer_Do(t *testing.T) {
 	// inputs
-	in := &data.Person{
+	in := &dataservice.Person{
 		FullName: "Chang",
 		Phone:    "11122233345",
 		Currency: "CNY",
@@ -58,7 +57,7 @@ func TestRegisterer_Do(t *testing.T) {
 
 func TestRegisterer_Do_Refactored(t *testing.T) {
 	// inputs
-	in := &data.Person{
+	in := &dataservice.Person{
 		FullName: "Chang",
 		Phone:    "11122233345",
 		Currency: "AUD",
