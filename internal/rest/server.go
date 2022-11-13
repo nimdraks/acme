@@ -23,7 +23,7 @@ func New(config Config) *Server {
 		handlerGet:      NewGetHandle(dataService),
 		handlerList:     NewListHandler(dataService),
 		handlerNotFound: notFoundHandler,
-		handlerRegister: NewRegisterHandler(config),
+		handlerRegister: NewRegisterHandler(config, dataService),
 	}
 }
 

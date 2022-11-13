@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/register"
 )
@@ -15,11 +16,12 @@ import (
 // In this simplified example we are assuming all possible errors are user errors and returning "bad request" HTTP 400.
 // There are some programmer errors possible but hopefully these will be caught in testing.
 type RegisterHandler struct {
-	config Config
+	config      Config
+	dataService dataservice.DataService
 }
 
-func NewRegisterHandler(c Config) *RegisterHandler {
-	return &RegisterHandler{config: c}
+func NewRegisterHandler(c Config, d dataservice.DataService) *RegisterHandler {
+	return &RegisterHandler{config: c, dataService: d}
 }
 
 // ServeHTTP implements http.Handler
@@ -69,7 +71,7 @@ func (h *RegisterHandler) register(ctx context.Context, requestPayload *register
 		Currency: requestPayload.Currency,
 	}
 
-	return register.NewRegisterer(h.config).Do(ctx, person)
+	return register.NewRegisterer(h.config, h.dataService).Do(ctx, person)
 }
 
 // register endpoint request format

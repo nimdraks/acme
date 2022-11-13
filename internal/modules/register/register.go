@@ -3,7 +3,9 @@ package register
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/logging"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/exchange"
@@ -47,11 +49,12 @@ type Config interface {
 }
 
 type Registerer struct {
-	config Config
+	config      Config
+	dataService dataservice.DataService
 }
 
-func NewRegisterer(config Config) *Registerer {
-	return &Registerer{config: config}
+func NewRegisterer(config Config, d dataservice.DataService) *Registerer {
+	return &Registerer{config: config, dataService: d}
 }
 
 // Do is API for this struct
@@ -112,11 +115,10 @@ func (r *Registerer) getPrice(ctx context.Context, currency string) (float64, er
 
 // save the registration
 func (r *Registerer) save(ctx context.Context, in *data.Person, price float64) (int, error) {
-	person := &data.Person{
-		FullName: in.FullName,
-		Phone:    in.Phone,
-		Currency: in.Currency,
-		Price:    price,
+	result := r.dataService.Save(ctx, in.FullName, in.Phone, in.Currency, fmt.Sprintf("%f", price))
+	if result < 0 {
+		return result, fmt.Errorf("Error")
 	}
-	return data.Save(ctx, person)
+
+	return result, nil
 }

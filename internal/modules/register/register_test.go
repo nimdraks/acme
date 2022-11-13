@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/dataservice"
 	"github.com/PacktPublishing/Hands-On-Dependency-Injection-in-Go/ch04/acme/internal/modules/data"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,7 +48,7 @@ func TestRegisterer_Do(t *testing.T) {
 	}
 
 	// call method
-	registerer := NewRegisterer(&mockOutConfig{})
+	registerer := NewRegisterer(&mockOutConfig{}, dataservice.InitHappyMockDataService())
 	ID, err := registerer.Do(context.TODO(), in)
 
 	// validate expectations
@@ -113,7 +114,7 @@ func TestRegisterer_Do_Refactored(t *testing.T) {
 		defer server.Close()
 
 		// call method
-		registerer := NewRegisterer(&mockInConfig{server.URL})
+		registerer := NewRegisterer(&mockInConfig{server.URL}, dataservice.InitHappyMockDataService())
 		ID, err := registerer.Do(context.TODO(), in)
 
 		// validate expectations

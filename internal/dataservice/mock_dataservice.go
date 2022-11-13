@@ -22,7 +22,7 @@ func (d *MockHappyDataService) LoadAll(ctx context.Context) ([]*Person, error) {
 }
 
 func (d *MockHappyDataService) Save(ctx context.Context, fullName, phone, currency, price string) int {
-	return -1
+	return 1
 }
 
 type MockBadNotFoundDataService struct {

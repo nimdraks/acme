@@ -15,7 +15,7 @@ import (
 
 func TestRegisterHandler_ServeHTTP(t *testing.T) {
 	// ensure the test always fails by giving it a timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// Create and start a server
